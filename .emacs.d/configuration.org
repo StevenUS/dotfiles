@@ -1,0 +1,217 @@
+* General
+  #+BEGIN_SRC emacs-lisp
+  ;; disable welcome screen
+  (setq inhibit-startup-message t)
+  ;; clear scratch buffer header
+  (setq initial-scratch-message nil)
+  ;; remove scroll bars
+  (scroll-bar-mode 0)
+  ;; no blinking cursor
+  (blink-cursor-mode 0)
+  ;; always show line numbers
+  (global-linum-mode t)
+  ;; don't display toolbar
+  (tool-bar-mode -1)
+  ;; disallow tabs
+  (setq-default indent-tabs-mode nil)
+  ;; set indenting to 4 places instead of default 2
+  (defun indentk ()
+  (setq c-basic-offset 4))
+  (add-hook 'c-mode-hook 'indentk)
+  ;; fontify code in code blocks
+  (setq org-src-fontify-natively t)
+  ;; show matching parens
+  (show-paren-mode 1)
+  ;; scroll one line at a time
+  (setq mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil)))
+  #+END_SRC
+
+  [[https://emacs.stackexchange.com/questions/41763/persistently-setting-display-line-numbers-to-relative-in-emacs-init-file][relative line numbers explained]]
+  #+BEGIN_SRC emacs-lisp
+  (setq display-line-numbers-type 'relative)
+  #+END_SRC
+
+  [[https://stackoverflow.com/a/6465415][move cursor to new split]]
+  #+BEGIN_SRC emacs-lisp
+  (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
+  (global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
+  #+END_SRC
+  
+* Packages 
+  #+BEGIN_SRC emacs-lisp
+    ;; Added by Package.el.  This must come before configurations of
+    ;; installed packages.  Don't delete this line.  If you don't want it,
+    ;; just comment it out by adding a semicolon to the start of the line.
+    ;; You may delete these explanatory comments.
+    (require 'package)
+    (package-initialize)
+    ;; refresh list of packages when you start emacs
+    ;; (package-refresh-contents)
+
+    ;; https://orgmode.org/elpa.html
+    (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/"))
+    (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+    (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/"))
+  #+END_SRC
+  
+** [[https://github.com/jwiegley/use-package#installing-use-package][use-package]]
+  #+BEGIN_SRC emacs-lisp
+    ;; This is only needed once, near the top of the file
+    (eval-when-compile
+    ;; Following line is not needed if use-package.el is in ~/.emacs.d
+    (add-to-list 'load-path "~/.emacs.d/elpa/use-package-20210207.1926")
+    (require 'use-package))
+  #+END_SRC
+** [[https://github.com/ema2159/centaur-tabs][centaur tabs]] 
+  #+BEGIN_SRC emacs-lisp
+    (use-package centaur-tabs
+    :demand
+    :config
+    (centaur-tabs-mode t)
+    :bind
+    ("C-<prior>" . centaur-tabs-backward)
+    ("C-<next>" . centaur-tabs-forward))
+  #+END_SRC
+   
+
+
+* Backups
+  [[https://www.emacswiki.org/emacs/BackupDirectory][docs]]
+  #+BEGIN_SRC emacs-lisp
+  ;;(setq
+  ;; backup-by-copying t      ; don't clobber symlinks
+  ;; backup-directory-alist
+  ;;  '(("." . "~/.saves/"))    ; don't litter my fs tree
+  ;; delete-old-versions t
+  ;; kept-new-versions 6
+  ;; kept-old-versions 2
+  ;; version-control t)       ; use versioned backups
+  #+END_SRC
+
+  [[https://www.emacswiki.org/emacs/AutoSave][auto save]] 
+   #+BEGIN_SRC emacs-lisp
+    (setq backup-directory-alist
+        `(("." . ,(concat user-emacs-directory "backups"))))
+  #+END_SRC
+
+* Evil Mode
+  [[https://evil.readthedocs.io/en/latest/overview.html#installation-via-package-el][installation]]
+  [[https://github.com/emacs-evil/evil][github]]
+  #+BEGIN_SRC emacs-lisp
+  (require 'evil)
+  (evil-mode 1)
+  #+END_SRC
+
+* sensible defaults
+  #+BEGIN_SRC emacs-lisp
+  
+  #+END_SRC
+
+* Display preferences
+  See an outline of bullets rather than asterisks
+  PACKAGE REQUIRED
+  #+BEGIN_SRC emacs-lisp
+  (require 'org-bullets)
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+  #+END_SRC
+  
+  globally set line numbers to relative [[https://emacs.stackexchange.com/questions/41763/persistently-setting-display-line-numbers-to-relative-in-emacs-init-file][explanation]]
+  #+BEGIN_SRC emacs-lisp
+  (setq display-line-numbers-type 'relative)
+  #+END_SRC
+
+* Org Mode
+** create time stamp when item marked as done [[https://orgmode.org/manual/Closing-items.html][closing items]]
+   #+BEGIN_SRC emacs-lisp
+   (setq org-log-done 'time)
+   #+END_SRC
+   Example:
+   CLOSED: [2020-05-24 Sun 10:11]
+
+** Configure Babel
+   [[https://orgmode.org/worg/org-contrib/babel/languages.html#configure][Configure Languages]]
+   active Babel Languages [[https://stackoverflow.com/questions/29163164/how-can-i-load-bash-as-opposed-to-sh-in-org-babel-to-enable-begin-src-bash][stack overflow]]
+   #+BEGIN_SRC emacs-lisp
+   (require 'ob-restclient)
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '(
+       (python . t)
+       (shell . t)
+       (restclient . t)
+       (sql . t)
+       (plantuml . t)
+       (js . t)
+       (java . t)
+      )
+    )    
+   #+END_SRC
+*** fix for babel js ([[https://gist.github.com/mrspeaker/c3b7b8d0b0b96b1a012d736b22d12b2e][supposedly patched]])
+    #+BEGIN_SRC emacs-lisp
+     (setq org-babel-js-function-wrapper
+         "process.stdout.write(require('util').inspect(function(){\n%s\n}(), { maxArrayLength: null, maxStringLength: null, breakLength: Infinity, compact: true }))")
+    #+END_SRC
+*** [[http://eschulte.github.io/babel-dev/DONE-integrate-plantuml-support.html][Plantuml jar path]] 
+   #+BEGIN_SRC emacs-lisp
+    (setq org-plantuml-jar-path
+        (expand-file-name "~/.emacs.d/plantuml.jar"))
+   #+END_SRC
+
+** Async orgmode execution
+   #+BEGIN_SRC emacs-lisp
+   (require 'ob-async)
+   #+END_SRC
+   Example: 
+   BEGIN_SRC sh :async
+
+** Export to Markdown
+   (require 'ox-md)
+   
+   #+BEGIN_SRC emacs-lisp
+   (setq org-export-html-postamble nil)
+   #+END_SRC
+
+** [[https://stackoverflow.com/a/38477233][resize inline images by specifying width in attr]]
+  #+BEGIN_SRC emacs-lisp
+  (setq org-image-actual-width nil)
+  #+END_SRC
+  usage
+  #+BEGIN_SRC
+  ;; C-c C-x C-v (org-toggle-inline-images)
+  
+  #+ATTR_ORG: :width 100
+  [[./filename.jpg]]
+  #+END_SRC
+  
+** [[https://emacs.stackexchange.com/a/3570][don't confirm babel execution]]
+  #+BEGIN_SRC emacs-lisp
+  (setq org-confirm-babel-evaluate nil)
+  #+END_SRC
+** increase csv to org table convert size
+  #+BEGIN_SRC emacs-lisp
+  (setq org-table-convert-region-max-lines 5000)
+  #+END_SRC
+* Sensible Defaults
+    #+BEGIN_SRC emacs-lisp
+    (load "~/.emacs.d/sensible-defaults.el")
+    (sensible-defaults/shorten-yes-or-no)
+    (sensible-defaults/confirm-closing-emacs)
+    #+END_SRC
+
+* [[https://stackoverflow.com/questions/1229142/how-can-i-save-my-mini-buffer-history-in-emacs][save mini buff history]]
+    #+BEGIN_SRC emacs-lisp
+    (savehist-mode 1)
+    ;; not sure what all these are
+    (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring))
+    ;; history file
+    (setq savehist-file "~/.emacs.d/tmp/savehist")
+    #+END_SRC
+
+* keycast
+  [[https://github.com/tarsius/keycast][Show current command]]
+  #+BEGIN_SRC emacs-lisp
+  (load "~/.emacs.d/keycast.el")
+  (keycast-mode)
+  #+END_SRC
+  
+
